@@ -16,6 +16,11 @@ func (EncodeOptions) IsEncodeOptions() {}
 type DecodeOptions struct {
 	CoerceUndefToNull bool
 
+	// CoerceUnknownSimpleToNull decodes the unassigned simple values
+	// (0xe0..0xf3, and 0xf8 followed by a byte of 32 or more) as null.
+	// When unset, they are rejected.
+	CoerceUnknownSimpleToNull bool
+
 	// RejectIndefinite errors at the indefinite-length sigil byte (0x5f,
 	// 0x7f, 0x9f, 0xbf) before any chunks are read or allocated.
 	RejectIndefinite bool

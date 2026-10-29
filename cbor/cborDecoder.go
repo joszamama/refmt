@@ -229,6 +229,20 @@ func (d *Decoder) stepHelper_acceptValue(majorByte byte, tokenSlot *Token) (done
 		tokenSlot.Type = TFloat64
 		tokenSlot.Float64, err = d.decodeFloat(majorByte)
 		return true, err
+	case cborSigilSimple:
+		if !d.cfg.CoerceUnknownSimpleToNull {
+			return true, fmt.Errorf("invalid majorByte: 0x%x", majorByte)
+		}
+		var b byte
+		b, err = d.r.Readn1()
+		if err != nil {
+			return true, err
+		}
+		if b < 32 { // not well-formed: values below 32 use the one-byte form
+			return true, fmt.Errorf("invalid simple value: 0x%x", b)
+		}
+		tokenSlot.Type = TNull
+		return true, nil
 	case cborSigilIndefiniteBytes:
 		if d.cfg.RejectIndefinite {
 			return true, ErrIndefiniteLength
@@ -315,6 +329,10 @@ func (d *Decoder) stepHelper_acceptValue(majorByte byte, tokenSlot *Token) (done
 				return true, err
 			}
 			return d.stepHelper_acceptValue(majorByte, tokenSlot)
+		case majorByte >= cborMajorSimple && majorByte < cborSigilFalse && d.cfg.CoerceUnknownSimpleToNull:
+			// Unassigned simple values 0..19.
+			tokenSlot.Type = TNull
+			return true, nil
 		default:
 			return true, fmt.Errorf("invalid majorByte: 0x%x", majorByte)
 		}

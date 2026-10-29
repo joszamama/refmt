@@ -26,6 +26,7 @@ const (
 	cborSigilTrue      byte = 0xf5
 	cborSigilNil       byte = 0xf6
 	cborSigilUndefined byte = 0xf7
+	cborSigilSimple    byte = 0xf8 // Simple value in the following byte.
 	cborSigilFloat16   byte = 0xf9
 	cborSigilFloat32   byte = 0xfA
 	cborSigilFloat64   byte = 0xfB
